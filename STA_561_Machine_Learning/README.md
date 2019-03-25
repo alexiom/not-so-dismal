@@ -1,2 +1,2 @@
 
-### STA 561: Probabilistic Machine Learning
+# STA 561: Probabilistic Machine Learning
