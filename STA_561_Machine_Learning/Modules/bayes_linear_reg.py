@@ -1,5 +1,5 @@
 #####################################################################
-# Author:                                                           #
+# Author: Alex Marsh                                                #
 # Title: Module for Bayesian Linear Regression                      #
 # Date: 03/24/2019                                                  #
 # Description: A module for functions to implement bayesian linear  # 
