@@ -20,6 +20,7 @@
 #===================================================================#
 import numpy as np
 
+from numpy import linalg as LA
 from numpy.linalg import inv
 from numpy.linalg import eig
 from numpy.linalg import norm
@@ -52,7 +53,7 @@ def est_beta_bayes(y,X,lambd):
 
     k = len(X[0])
     XtX = matmul(t(X),X)
-    beta_hat = matmul(inv(XtX+lambd*np.identity(k)),matmul(t(X),y))
+    beta_hat = matmul(LA.inv(XtX+lambd*np.identity(k)),matmul(t(X),y))
     return beta_hat
 
 
@@ -65,7 +66,7 @@ def find_sig2_0(y,X):
     """
     k = len(X[0])
     XtX = matmul(t(X),X)
-    beta_OLS = matmul(inv(XtX),matmul(t(X),y))
+    beta_OLS = matmul(LA.inv(XtX),matmul(t(X),y))
     es = y - matmul(X,beta_OLS)
     sig2_0 = np.var(es)
     return sig2_0
@@ -91,10 +92,10 @@ def find_tau2_sig2(y,X):
     alpha_opt = gamma_opt
     XtX = matmul(t(X),X)
     mean_post = est_beta_bayes(y,X,alpha_opt/gamma_opt)
-    e_vals0 = eig(XtX)[0]
+    e_vals0 = LA.eig(XtX)[0]
     theta = np.array([1/alpha_opt,1/gamma_opt],dtype=float)
     theta_prev = np.array([0,0],dtype=float)
-    theta_diff = norm(theta-theta_prev)
+    theta_diff = LA.norm(theta-theta_prev)
     tol = 0.000000000001
     N = 1.0
     while theta_diff>tol and N<1000:
@@ -104,8 +105,8 @@ def find_tau2_sig2(y,X):
         alpha_opt = gamma/np.dot(mean_post,mean_post)
         gamma_opt = np.sum(np.square(y-matmul(X,t(mean_post))))
         gamma_opt = (n-gamma)/gamma_opt
-        mean_post = est_beta_bayes(alpha_opt/gamma_opt,y,X)
+        mean_post = est_beta_bayes(y,X,alpha_opt/gamma_opt)
         theta = np.array([1/alpha_opt,1/gamma_opt],dtype=float)
-        theta_diff = norm(theta-theta_prev)
+        theta_diff = LA.norm(theta-theta_prev)
         N=N+1
     return theta
