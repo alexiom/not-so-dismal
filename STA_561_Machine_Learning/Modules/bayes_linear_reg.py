@@ -52,7 +52,7 @@ def est_beta_bayes(y,X,lambd):
 
     k = len(X[0])
     XtX = matmul(t(X),X)
-    beta_hat = matmul(inv(XtX+lambd*identity(k)),matmul(t(X),y))
+    beta_hat = matmul(inv(XtX+lambd*np.identity(k)),matmul(t(X),y))
     return beta_hat
 
 
@@ -90,7 +90,7 @@ def find_tau2_sig2(y,X):
     gamma_opt = sqrt(1/sig2_0) #set starting 
     alpha_opt = gamma_opt
     XtX = matmul(t(X),X)
-    mean_post = est_beta_bayes(alpha_opt/gamma_opt,y,X)
+    mean_post = est_beta_bayes(y,X,alpha_opt/gamma_opt)
     e_vals0 = eig(XtX)[0]
     theta = np.array([1/alpha_opt,1/gamma_opt],dtype=float)
     theta_prev = np.array([0,0],dtype=float)
