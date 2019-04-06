@@ -1,0 +1,112 @@
+---
+title: "Errors Versus Residuals Example"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Model Setup
+
+This first chunk of code just sets all parameters, simulates data, and estimates the model with OLS.
+```{r}
+library(ggplot2)
+set.seed(123) #set RNG seed
+#this allows us to replicate our results
+
+#===================================================================================#
+#                                   Set Parameters                                  #
+#===================================================================================#
+N       = 1000 #set sample size
+alpha   = -2   #set value of population intercept
+beta    = 5    #set value of population slope coefficient
+x_mu    = 5    #set mean of independent variable
+x_std   = 0.5  #set standard deviation of independent variable
+eps_std = 5    #set standard deviation of population errors
+#===================================================================================#
+#                                   Simulate Data                                   #
+#===================================================================================#
+x_vals = rnorm(N,x_mu,x_std)      #generate x data
+x_m    = min(x_vals)              #store minimum x value for later
+x_M    = max(x_vals)              #store maximum x value for later
+errors = rnorm(N,0,eps_std)       #generate errors
+y_vals = alpha+beta*x_vals+errors #generate y data
+#NOTE: THIS IS THE POPULATION MODEL
+#===================================================================================#
+#                                   Estimate Model                                  #
+#===================================================================================#
+est_model = lm(y_vals~x_vals) #estimate model
+summary(est_model)
+```
+
+\pagebreak
+
+**This is very important.** Notice that the *population* model is $$y_i=\alpha+\beta x_i+\epsilon_i.$$ However, the estimated model is $$y_i=\hat{\alpha}+\hat{\beta} x_i+u_i.$$
+
+So $\epsilon_i$ is the error for observation $i$ whereas $u_i$ is the residual for observation $i$.
+
+## Compare Parameters and Estimates
+
+Now I will compare the true values of the population parameters with the parameters estimated with OLS.
+
+```{r}
+#===================================================================================#
+#                       Save Parameters into Data Frame                             #
+#===================================================================================#
+param_df = data.frame("population"=c(alpha,beta),
+                      "estimated"=coefficients(est_model))
+row.names(param_df) = c("constant","slope")
+#===================================================================================#
+#                        Display Parameter Data Frame                               #
+#===================================================================================#
+param_df
+```
+
+The true value of $\alpha$ is `r alpha` whereas the estimated value (called $\hat{\alpha}$) is `r round(coef(est_model)[1],3)`. Likewise, the true value of $\beta$ is `r beta` whereas the estimated value (called $\hat{\beta}$) is `r round(coef(est_model)[2],3)`.
+
+## Plots Population Line of Best Fit and Estimated Line of Best Fit
+
+Now I will plot the line of best fit for both $$\hat{y}=\alpha+\beta x$$ and $$\hat{\tilde{y}}=\hat{\alpha}+\hat{\beta} x$$
+
+```{r}
+#===================================================================================#
+#                               Make Data To Plot                                   #
+#===================================================================================#
+x_points   = seq(x_m,x_M,length.out = N) #make x values for line of best fit
+alpha_hat  = coef(est_model)[1]          #store alpha_hat
+beta_hat   = coef(est_model)[2]          #store beta_hat
+
+point_data = data.frame("x"=x_vals,"y"=y_vals,
+                       "error"=errors,"residual"=resid(est_model))
+
+line_data  = data.frame("x"=c(x_points,x_points),
+                       "y"=c(alpha+beta*x_points,alpha_hat+beta_hat*x_points),
+                       "group"=c(rep("population",N),rep("OLS",N)))
+```
+\pagebreak
+```{r}
+#===================================================================================#
+#                                      Make Plot                                    #
+#===================================================================================#
+p1 = ggplot(data=point_data,aes(x=x,y=y))+geom_point()+
+  geom_line(data=line_data,aes(x=x,y=y,color=factor(group)),size=1.2)+
+  labs(title="Line of Best Fit: Population v.s. OLS Estimate",
+       y="y value",x="x value",color="Model")
+#===================================================================================#
+#                                   Display Plot                                    #
+#===================================================================================#
+p1
+```
+
+Notice how the two lines are *different*. This is because I made them with two different sets of parameters: $\alpha$ and $\beta$ for the population model compared to $\hat{\alpha}$ and $\hat{\beta}$ for the model estimated with OLS.
+
+**Therefore, since the lines are different, that means the value of the "error" (i.e. the distance between any point on the plot and the estimated line) will be different.**
+
+Below are the values of the error versus the value of the residual for some of the observations.
+
+\pagebreak
+
+```{r}
+head(point_data[,3:4],n=50)
+```
