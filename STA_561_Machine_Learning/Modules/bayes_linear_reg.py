@@ -21,10 +21,6 @@
 import numpy as np
 
 from numpy import linalg as LA
-from numpy.linalg import inv
-from numpy.linalg import eig
-from numpy.linalg import norm
-
 from math import sqrt
 
 #===================================================================#
